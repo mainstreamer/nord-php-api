@@ -2,9 +2,11 @@
 
 namespace App\Tests\Unit;
 
+use App\Dto\UserDto;
 use App\Entity\Item;
 use App\Entity\User;
 use App\Service\ItemService;
+use App\Service\UserService;
 use PHPUnit\Framework\TestCase;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -20,13 +22,14 @@ class ItemServiceTest extends TestCase
      * @var ItemService
      */
     private $itemService;
+    private $userService;
 
     public function setUp(): void
     {
         /** @var EntityManagerInterface */
         $this->entityManager = $this->createMock(EntityManagerInterface::class);
-        
-        $this->itemService = new ItemService($this->entityManager);
+        $this->userService = $this->createMock(UserService::class);
+        $this->itemService = new ItemService($this->entityManager, $this->userService);
     }
 
     public function testCreate(): void

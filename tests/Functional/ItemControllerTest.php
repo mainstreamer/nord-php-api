@@ -26,8 +26,8 @@ class ItemControllerTest extends WebTestCase
 
         $newItemData = ['data' => $data];
 
-        $client->request('POST', '/item', $newItemData);
-        $client->request('GET', '/item');
+        $client->request('POST', '/items', $newItemData);
+        $client->request('GET', '/items');
 
         $this->assertResponseIsSuccessful();
         $this->assertStringContainsString('very secure new item data', $client->getResponse()->getContent());
