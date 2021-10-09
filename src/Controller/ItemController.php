@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Item;
+use App\Repository\ItemRepository;
 use App\Security\ItemVoter;
 use App\Service\ItemService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,60 +22,48 @@ class ItemController extends AbstractController
      * @Route("/items", name="item_list", methods={"GET"})
      * @IsGranted("ROLE_USER")
      */
-    public function list(): JsonResponse
+    public function list(Request $request, ItemRepository $repository, ItemService $service): JsonResponse
     {
-        $items = $this->getDoctrine()->getRepository(Item::class)->findBy(['user' => $this->getUser()]);
+        $page = (int) $request->get('page');
+        $items = $repository->getItemsByUserAndPage($this->getUser(), $page > 0 ? $page : 1);
 
-        $allItems = [];
-        foreach ($items as $item) {
-            $oneItem['id'] = $item->getId();
-            $oneItem['data'] = $item->getData();
-            $oneItem['created_at'] = $item->getCreatedAt();
-            $oneItem['updated_at'] = $item->getUpdatedAt();
-            $allItems[] = $oneItem;
-        }
-
-        return $this->json($allItems);
+        return $this->json($service->getDtos($items));
     }
 
     /**
      * @Route("/items", name="item_create", methods={"POST"})
      * @IsGranted("ROLE_USER")
      */
-    public function create(Request $request, ItemService $itemService)
+    public function create(
+        Request $request, 
+        ItemService $itemService, 
+        EntityManagerInterface $entityManager
+    ): JsonResponse
     {
         $data = $request->get('data');
 
-        if (empty($data)) {
-            return $this->json(['error' => 'No data parameter']);
-        }
-
-        $itemService->create($this->getUser(), $data);
-
-        return $this->json([]);
-    }
-
-    /**
-     * @Route("/items/{id}", name="items_delete", methods={"DELETE"})
-     * @IsGranted("ROLE_USER")
-     */
-    public function delete(Request $request, int $id)
-    {
-        if (empty($id)) {
+        if (null === $data) {
             return $this->json(['error' => 'No data parameter'], Response::HTTP_BAD_REQUEST);
         }
 
-        $item = $this->getDoctrine()->getRepository(Item::class)->find($id);
+        $item = $itemService->create($this->getUser(), $data);
+        $entityManager->persist($item);
+        $entityManager->flush();
+        
+        return $this->json($itemService->getDto($item));
+    }
 
-        if ($item === null) {
-            return $this->json(['error' => 'No item'], Response::HTTP_BAD_REQUEST);
-        }
+    /**
+     * @Route("/items/{item}", name="items_delete", methods={"DELETE"})
+     * @IsGranted("ROLE_USER")
+     */
+    public function delete(Request $request, Item $item, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $this->denyAccessUnlessGranted(ItemVoter::ACCESS, $item);
+        $entityManager->remove($item);
+        $entityManager->flush();
 
-        $manager = $this->getDoctrine()->getManager();
-        $manager->remove($item);
-        $manager->flush();
-
-        return $this->json([]);
+        return $this->json([], Response::HTTP_NO_CONTENT);
     }
     
     /**
@@ -86,7 +75,8 @@ class ItemController extends AbstractController
         Item $item, 
         EntityManagerInterface $entityManager,
         ItemService $itemService
-    ) {
+    ): JsonResponse 
+    {
         $this->denyAccessUnlessGranted(ItemVoter::ACCESS, $item);
         $item->setData($request->get('data'));
         $entityManager->flush();

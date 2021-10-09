@@ -4,29 +4,24 @@ namespace App\Service;
 
 use App\Dto\ItemDto;
 use App\Entity\Item;
-use App\Entity\User;
-use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 class ItemService
 {
-    private EntityManagerInterface $entityManager;
-    
     private UserService $userService;
 
-    public function __construct(EntityManagerInterface $entityManager, UserService $userService)
+    public function __construct(UserService $userService)
     {
-        $this->entityManager = $entityManager;
         $this->userService = $userService;
     }
 
-    public function create(User $user, string $data): void
+    public function create(UserInterface $user, string $data): Item
     {
         $item = new Item();
         $item->setUser($user);
         $item->setData($data);
-
-        $this->entityManager->persist($item);
-        $this->entityManager->flush();
+        
+        return $item;
     }
     
     public function getDto(Item $item): ItemDto
@@ -38,5 +33,16 @@ class ItemService
             \DateTimeImmutable::createFromMutable($item->getUpdatedAt()),
             $this->userService->getDto($item->getUser())
         );
+    }
+    
+    public function getDtos(array $items): array
+    {
+        $allItems = [];
+        
+        foreach ($items as $item) {
+            $allItems[] = $this->getDto($item);
+        }
+        
+        return $allItems;
     }
 } 
