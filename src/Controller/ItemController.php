@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Item;
+use App\Security\ItemVoter;
 use App\Service\ItemService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -86,6 +87,7 @@ class ItemController extends AbstractController
         EntityManagerInterface $entityManager,
         ItemService $itemService
     ) {
+        $this->denyAccessUnlessGranted(ItemVoter::ACCESS, $item);
         $item->setData($request->get('data'));
         $entityManager->flush();
         
