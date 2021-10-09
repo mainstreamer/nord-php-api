@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Entity\Item;
 use App\Service\ItemService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,7 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 class ItemController extends AbstractController
 {
     /**
-     * @Route("/item", name="item_list", methods={"GET"})
+     * @Route("/items", name="item_list", methods={"GET"})
      * @IsGranted("ROLE_USER")
      */
     public function list(): JsonResponse
@@ -36,7 +37,7 @@ class ItemController extends AbstractController
     }
 
     /**
-     * @Route("/item", name="item_create", methods={"POST"})
+     * @Route("/items", name="item_create", methods={"POST"})
      * @IsGranted("ROLE_USER")
      */
     public function create(Request $request, ItemService $itemService)
@@ -53,7 +54,7 @@ class ItemController extends AbstractController
     }
 
     /**
-     * @Route("/item/{id}", name="items_delete", methods={"DELETE"})
+     * @Route("/items/{id}", name="items_delete", methods={"DELETE"})
      * @IsGranted("ROLE_USER")
      */
     public function delete(Request $request, int $id)
@@ -73,5 +74,21 @@ class ItemController extends AbstractController
         $manager->flush();
 
         return $this->json([]);
+    }
+    
+    /**
+     * @Route("/items/{item}", name="items_update", methods={"PUT"})
+     * @IsGranted("ROLE_USER")
+     */
+    public function update(
+        Request $request, 
+        Item $item, 
+        EntityManagerInterface $entityManager,
+        ItemService $itemService
+    ) {
+        $item->setData($request->get('data'));
+        $entityManager->flush();
+        
+        return $this->json($itemService->getDto($item));
     }
 }
