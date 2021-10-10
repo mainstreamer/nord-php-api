@@ -2,10 +2,11 @@
 
 namespace App\Tests;
 
+use App\Entity\Item;
 use App\Repository\ItemRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use App\Repository\UserRepository;
-use Doctrine\ORM\EntityManagerInterface;
 
 class ItemControllerTest extends WebTestCase
 {
@@ -31,5 +32,61 @@ class ItemControllerTest extends WebTestCase
         $this->assertStringContainsString('very secure new item data', $client->getResponse()->getContent());
 
         $itemRepository->findOneByData($data);
+    }
+    
+    public function testUpdate()
+    {
+        $client = static::createClient();
+        $userRepository = static::$container->get(UserRepository::class);
+        $itemRepository = static::$container->get(ItemRepository::class);
+        $em = static::$container->get(EntityManagerInterface::class);
+        $user = $userRepository->findOneByUsername('john');
+    
+        $data = 'to be updated';
+        $newItem = new Item();
+        $newItem->setData($data);
+        $newItem->setUser($user);
+        $em->persist($newItem);
+        $em->flush($newItem);
+        $item = $itemRepository->findOneBydata($data);
+    
+        self::assertEquals($data, $itemRepository->findOneByData($data)->getData());
+        
+        $user = $userRepository->findOneByUsername('john');
+        $client->loginUser($user);
+        $client->request('PUT', '/items/' . $item->getId(), ['data' => 'changed data']);
+        
+        $this->assertResponseIsSuccessful();
+        $this->assertStringContainsString('changed data', $client->getResponse()->getContent());
+        
+        self::assertEquals('changed data', $itemRepository->findOneById($item->getId())->getData());
+    }
+    
+    public function testDelete()
+    {
+        $client = static::createClient();
+        
+        $userRepository = static::$container->get(UserRepository::class);
+        $itemRepository = static::$container->get(ItemRepository::class);
+        $em = static::$container->get(EntityManagerInterface::class);
+    
+        $user = $userRepository->findOneByUsername('john');
+        
+        $data = 'to be deleted';
+        $newItem = new Item();
+        $newItem->setData($data);
+        $newItem->setUser($user);
+        $em->persist($newItem);
+        $em->flush($newItem);
+        $item = $itemRepository->findOneBydata($data);
+        
+        self::assertEquals($data, $itemRepository->findOneByData($data)->getData());
+        
+        $user = $userRepository->findOneByUsername('john');
+        $client->loginUser($user);
+        
+        $client->request('DELETE', '/items/' . $item->getId());
+    
+        self::assertEquals(null, $itemRepository->findOneById($item->getId()));
     }
 }
