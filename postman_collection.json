@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "61b35858-b265-494e-b019-e0377c4352bc",
+		"_postman_id": "6a9cf5ff-ad3d-4d86-9de1-a6846bbed115",
 		"name": "PHP test",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -71,7 +71,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://secure-storage.localhost:8000/item",
+					"raw": "http://secure-storage.localhost:8000/items",
 					"protocol": "http",
 					"host": [
 						"secure-storage",
@@ -79,7 +79,7 @@
 					],
 					"port": "8000",
 					"path": [
-						"item"
+						"items"
 					]
 				}
 			},
@@ -95,13 +95,13 @@
 					"formdata": [
 						{
 							"key": "data",
-							"value": "new item secret",
+							"value": "some text goes here",
 							"type": "text"
 						}
 					]
 				},
 				"url": {
-					"raw": "http://secure-storage.localhost:8000/item",
+					"raw": "http://secure-storage.localhost:8000/items",
 					"protocol": "http",
 					"host": [
 						"secure-storage",
@@ -109,7 +109,7 @@
 					],
 					"port": "8000",
 					"path": [
-						"item"
+						"items"
 					]
 				}
 			},
@@ -121,22 +121,23 @@
 				"method": "PUT",
 				"header": [],
 				"body": {
-					"mode": "formdata",
-					"formdata": [
+					"mode": "urlencoded",
+					"urlencoded": [
 						{
 							"key": "id",
 							"value": "1",
-							"type": "text"
+							"type": "text",
+							"disabled": true
 						},
 						{
 							"key": "data",
-							"value": "new secret",
+							"value": "some data",
 							"type": "text"
 						}
 					]
 				},
 				"url": {
-					"raw": "http://secure-storage.localhost:8000/item",
+					"raw": "http://secure-storage.localhost:8000/items/97",
 					"protocol": "http",
 					"host": [
 						"secure-storage",
@@ -144,7 +145,8 @@
 					],
 					"port": "8000",
 					"path": [
-						"item"
+						"items",
+						"97"
 					]
 				}
 			},
@@ -156,7 +158,7 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://secure-storage.localhost:8000/item/1",
+					"raw": "http://secure-storage.localhost:8000/items/4",
 					"protocol": "http",
 					"host": [
 						"secure-storage",
@@ -164,8 +166,8 @@
 					],
 					"port": "8000",
 					"path": [
-						"item",
-						"1"
+						"items",
+						"4"
 					]
 				}
 			},
