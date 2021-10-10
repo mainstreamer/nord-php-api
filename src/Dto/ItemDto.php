@@ -25,6 +25,7 @@ class ItemDto implements \JsonSerializable
         $this->data = $data;
         $this->createdAt = $createdAt;
         $this->updatedAt = $updatedAt;
+        $this->userDto = $userDto;
     }
     
     public function jsonSerialize(): array

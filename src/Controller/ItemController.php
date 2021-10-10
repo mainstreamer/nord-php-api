@@ -25,7 +25,7 @@ class ItemController extends AbstractController
     public function list(Request $request, ItemRepository $repository, ItemService $service): JsonResponse
     {
         $page = (int) $request->get('page');
-        $items = $repository->getItemsByUserAndPage($this->getUser(), $page > 0 ? $page : 1);
+        $items = $repository->findItemsByUserAndPage($this->getUser(), $page > 0 ? $page : 1);
 
         return $this->json($service->getDtos($items));
     }

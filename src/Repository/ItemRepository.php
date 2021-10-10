@@ -20,7 +20,7 @@ class ItemRepository extends ServiceEntityRepository
         parent::__construct($registry, Item::class);
     }
     
-    public function getItemsByUserAndPage(User $user, int $page): array
+    public function findItemsByUserAndPage(User $user, int $page): array
     {
         return $this->findByUser($user, null, 10, ($page - 1) * $page);
     }

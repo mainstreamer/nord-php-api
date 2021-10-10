@@ -27,7 +27,7 @@ class ItemService
     public function getDto(Item $item): ItemDto
     {
         return new ItemDto(
-            $item->getId(),
+            (int) $item->getId(),
             $item->getData(),
             \DateTimeImmutable::createFromMutable($item->getCreatedAt()),
             \DateTimeImmutable::createFromMutable($item->getUpdatedAt()),
